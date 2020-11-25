@@ -51,11 +51,17 @@ def set_seed(seed=1337):
     if obj_cuda:
         torch.cuda.manual_seed_all(seed)
 
+def create_folder(path):
+    directory = ['images', 'models', 'data']
+    for i in directory:
+        if not os.path.exists(path + "/" + i):
+            os.mkdirs(directory)
+
 
 def prepare_audio(args):
     print("Loading Files ...")
-    speech_dataset = FileManager(args, "speech", "korean_data")
-    noise_dataset = FileManager(args, "noise", "QUT-NOISE")
+    speech_dataset = FileManager(args, "speech", "processing_data/korean-data")
+    noise_dataset = FileManager(args, "noise", "processing_data/QUT-NOISE")
 
     speech_dataset.prepare_files()
     noise_dataset.prepare_files(normalize=True)
@@ -139,6 +145,7 @@ def load_model(args):
 
 if __name__ == '__main__':
     args = get_args()
+    create_folder("./")     # 현재폴더에 필요한 파일 생성
     data = prepare_audio()
     net, net_large, gru, gru_large, densenet, densenet_large = load_model(args)
     networks = {

@@ -13,6 +13,17 @@
     - QUT-NOISE Dataset(https://research.qut.edu.au/saivt/databases/qut-noise-databases-and-protocols/)
  
 ## Requirements
+- torch==1.7.0
+- scikit-learn==0.23.2
+- h5py==3.1.0
+- h5py-cache==1.0
+- numpy==1.19.2
+- pydub==0.24.1
+- python-speech-features==0.6
+- SoundFile==0.10.3.post1
+- webrtcvad==2.0.10
+- ipython==7.19.0
+- matplotlib==3.3.3
 
 ## 사용법
 
