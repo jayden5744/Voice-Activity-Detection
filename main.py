@@ -34,10 +34,10 @@ def get_args():
     # prepare_audio should always be false unless one wants to force a new data generator
     parser.add_argument('--prepare_audio', default=False, type=bool)
     # train_model will enforce a fresh training of our defined models, rathre than loading them from local storage.
-    parser.add_argument('--train_model', default=False, type=bool)
+    parser.add_argument('--train_model', default=True, type=bool)
 
     # Hyper-parameters
-    parser.add_argument('--batch_size', default=2048, type=int)
+    parser.add_argument('--batch_size', default=4096, type=int)
     parser.add_argument('--frames', default=30, type=int)
     parser.add_argument('--features', default=24, type=int)
     parser.add_argument('--step_size', default=6, type=int)
@@ -51,11 +51,12 @@ def set_seed(seed=1337):
     if obj_cuda:
         torch.cuda.manual_seed_all(seed)
 
+
 def create_folder(path):
     directory = ['images', 'models', 'data']
     for i in directory:
-        if not os.path.exists(path + "/" + i):
-            os.mkdirs(directory)
+        if not os.path.exists(os.getcwd() + "/" + i):
+            os.makedirs(os.getcwd() + "/" + i)
 
 
 def prepare_audio(args):
@@ -81,24 +82,18 @@ def prepare_audio(args):
 
 
 def net_path(epoch, title):
-    part = os.getcwd() + '/models/' + title
+    part = os.getcwd() + '/models/' + title + '/' + title
     if epoch >= 0:
         return part + '_epoch' + str(epoch).zfill(3) + '.net'
     else:
         return part + '.net'
 
 
-def load_net(epoch=15, title='net'):
+def load_net(epoch=14, title='net'):
     if obj_cuda:
         return torch.load(net_path(epoch, title))
     else:
         return torch.load(net_path(epoch, title), map_location='cpu')
-
-
-def save_net(net, epoch, title='net'):
-    if not os.path.exists(os.getcwd() + '/models'):
-        os.makedirs(os.getcwd() + '/models')
-    torch.save(net, net_path(epoch, title))
 
 
 def load_model(args):
@@ -106,32 +101,32 @@ def load_model(args):
         trainer = Trainer(args)
         # LSTM, small, γ = 0
         set_seed()
-        net = Net(large=False)
+        net = Net(args, large=False)
         trainer.train(net, data, title='net', gamma=0)
 
         # LSTM, large, γ = 2
         set_seed()
-        net_large = Net()
+        net_large = Net(args)
         trainer.train(net_large, data, title='net_large', gamma=2)
 
         # Conv + GRU, small, γ = 2
         set_seed()
-        gru = NickNet(large=False)
+        gru = NickNet(args, large=False)
         trainer.train(gru, data, title='gru', gamma=2)
 
         # Conv + GRU, large, γ = 2
         set_seed()
-        gru_large = NickNet()
+        gru_large = NickNet(args)
         trainer.train(gru_large, data, title='gru_large', gamma=2)
 
         # DenseNet, small, γ = 2
         set_seed()
-        densenet = DenseNet(large=False)
+        densenet = DenseNet(large=False, batch_size=args.batch_size)
         trainer.train(densenet, data, title='densenet', use_adam=False, lr=1, momentum=0.7, gamma=2)
 
         # DenseNet, large, γ = 2
         set_seed()
-        densenet_large = DenseNet(large=True)
+        densenet_large = DenseNet(large=True, batch_size=args.batch_size)
         trainer.train(densenet, data, title='densenet_large', use_adam=False, lr=1, momentum=0.7, gamma=2)
     else:
         net = load_net(title='net')
@@ -145,8 +140,8 @@ def load_model(args):
 
 if __name__ == '__main__':
     args = get_args()
-    create_folder("./")     # 현재폴더에 필요한 파일 생성
-    data = prepare_audio()
+    create_folder("./")  # 현재폴더에 필요한 파일 생성
+    data = prepare_audio(args)
     net, net_large, gru, gru_large, densenet, densenet_large = load_model(args)
     networks = {
         'RNN': net,
@@ -180,7 +175,3 @@ if __name__ == '__main__':
     print('Complete DenseNet')
     evalator.netvad(net_large, data, only_plot_net=False, net_name='DenseNet (large)')
     print('Complete DenseNet (large)')
-
-
-
-

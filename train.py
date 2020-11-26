@@ -25,6 +25,20 @@ def accuracy(out, y):
     return torch.mean(eq)
 
 
+def net_path(epoch, title):
+    part = os.getcwd() + '/models/' + title + '/' + title
+    if epoch >= 0:
+        return part + '_epoch' + str(epoch).zfill(3) + '.net'
+    else:
+        return part + '.net'
+
+
+def save_net(net, epoch, title='net'):
+    if not os.path.exists(os.getcwd() + '/models/'+ title):
+        os.makedirs(os.getcwd() + '/models/' + title)
+    torch.save(net, net_path(epoch, title))
+
+
 class Trainer(object):
     def __init__(self, args):
         self.args = args
@@ -38,7 +52,7 @@ class Trainer(object):
               weight_decay=1e-5, momentum=0.9, use_focal_loss=True, gamma=0.0,
               early_stopping=False, patience=25, auto_save=True, title='net', verbose=True):
         # set up an instance of data generator using default partitions
-        generator = DataGenerator(data, size_limit)
+        generator = DataGenerator(self.args, data, size_limit)
         generator.setup_generation(self.frame_count, self.step_size, self.batch_size)
 
         # Noise level does not match
@@ -132,7 +146,7 @@ class Trainer(object):
                     dur = str(int((time.time() - start_time) / 60))
                     print(f'\nEpoch wall-time: {dur} min')
 
-                self.plot(losses, accs, val_losses, val_accs, generator)
+                # self.plot(losses, accs, val_losses, val_accs, generator)
 
     def plot(self, losses, accs, val_losses, val_accs, generator):
         """

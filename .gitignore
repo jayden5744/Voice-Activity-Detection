@@ -127,3 +127,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Custom
+processing_data/korean-data/
+processing_data/QUT-NOISE/
+models/
+images/
+data/
+.flac
+.net
+.hdf5

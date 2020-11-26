@@ -15,13 +15,13 @@ class Vis:
         return raw / np.max(np.abs(raw), axis=0)
 
     @staticmethod
-    def _time_axis(self, raw, labels):
+    def _time_axis(raw, labels):
         """
         Private function.
         Generates time axis for a raw signal and its labels.
         """
 
-        time = np.linspace(0, len(raw) / self.sample_rate, num=len(raw))
+        time = np.linspace(0, len(raw) / SAMPLE_RATE, num=len(raw))
         time_labels = np.linspace(0, len(raw) / SAMPLE_RATE, num=len(labels))
         return time, time_labels
 
@@ -38,8 +38,9 @@ class Vis:
         plt.title(title)
         plt.plot(time, raw)
         plt.plot(time_labels, labels - 0.5)
-        plt.show()
-        plt.savefig("./images/{}.img".format(title))
+        # plt.show()
+        plt.savefig("./images/{}.png".format(title))
+        plt.clf()
 
     @staticmethod
     def plot_sample(frames, labels, title='Sample', show_distribution=True):

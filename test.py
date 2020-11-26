@@ -1,4 +1,3 @@
-import math
 import time
 import numpy as np
 from sklearn import metrics
@@ -54,7 +53,8 @@ class Evaluation:
             x = Variable(torch.from_numpy(np.array(x)).float())
             y = Variable(torch.from_numpy(np.array(y))).long()
 
-            if obj_cuda():
+            if obj_cuda:
+                net = net.cuda()
                 x = x.cuda()
 
             out = net(x)
@@ -71,7 +71,7 @@ class Evaluation:
 
         return y_true, y_score
 
-    def roc_auc(self, nets, data, noise_lvl, size_limit):
+    def roc_auc(self, nets, data, noise_lvl, size_limit=0):
         """
         Generates a ROC Curve for the given network and data for each noise level.
         :param nets:
@@ -82,12 +82,6 @@ class Evaluation:
         """
         plt.figure(1, figsize=(16, 10))
         plt.title('Receiver Operating Characteristic (%s)' % noise_lvl, fontsize=16)
-        plt.xlim([0, 0.2])
-        plt.ylim([0.6, 1])
-        plt.ylabel('True Positive Rate', fontsize=16)
-        plt.xlabel('False Positive Rate', fontsize=16)
-        plt.plot([0, 1], [0, 1], 'r--')
-        plt.legend(loc='lower right', prop={'size': 16})
 
         # For each noise level
         for key in nets:
@@ -102,8 +96,17 @@ class Evaluation:
 
             # Plots the ROC Curve and show area
             plt.plot(fpr, tpr, label='%s (AUC = %0.3f)' % (key, auc_res))
-            plt.savefig("images/%s_%s.img" % (key, noise_lvl))
-        plt.show()
+
+
+        plt.xlim([0, 0.2])
+        plt.ylim([0.6, 1])
+        plt.ylabel('True Positive Rate', fontsize=16)
+        plt.xlabel('False Positive Rate', fontsize=16)
+        plt.plot([0, 1], [0, 1], 'r--')
+        plt.legend(loc='lower right', prop={'size': 16})
+        plt.savefig("images/%s.jpg" % noise_lvl)
+        plt.clf()
+        # plt.show()
 
     def far(self, nets, data, size_limit=0, frr=1, plot=True):
         """
@@ -144,19 +147,22 @@ class Evaluation:
             # Return closest result if no good match found.
             return far, frr
 
-        f = open("./images/far_far.txt", 'w')
+        f = open("./images/far_frr.txt", 'w')
 
         for key in nets:
             net = nets[key]
-            f.write(key + ':')
-            f.write('Network metrics: ')
+            f.write(key + ':\n')
+            f.write('Network metrics: \n')
             print(key + ':')
             print('Network metrics: ')
             for lvl in self.noise_levels:
                 # Make predictions
                 y_true, y_score = self.test_predict(net, data, size_limit, lvl)
-                f.write('FAR: %0.2f%% for fixed FRR at %0.2f%% and noise level ' % fix_frr(y_true, y_score, frr, lvl) + lvl)
-                print('FAR: %0.2f%% for fixed FRR at %0.2f%% and noise level ' % fix_frr(y_true, y_score, frr, lvl), lvl)
+                f.write(
+                    'FAR: %0.2f%% for fixed FRR at %0.2f%% and noise level ' % fix_frr(y_true, y_score, frr, lvl)
+                    + lvl + '\n')
+                print('FAR: %0.2f%% for fixed FRR at %0.2f%% and noise level ' % fix_frr(y_true, y_score, frr, lvl),
+                      lvl)
         print('-----Save FAR_FRR.txt-----')
 
     def netvad(self, net, data, noise_level='-3', init_pos=50, length=700, only_plot_net=False, timeit=True,
@@ -167,14 +173,14 @@ class Evaluation:
         """
 
         # Set up an instance of data generator using default partitions
-        generator = DataGenerator(data)
+        generator = DataGenerator(self.args, data)
         generator.setup_generation(self.frames, self.step_size, self.batch_size)
 
         # Noise level does not match
         if noise_level not in self.noise_levels:
             raise Exception("Error: invalid noise level!")
 
-        # When the training data connot be found
+        # When the training data cannot be found
         if generator.test_size == 0:
             raise Exception("Error : no test data was found!")
 
@@ -224,15 +230,15 @@ class Evaluation:
         if timeit:
             dur_net = str((time.time() - start_net) * 1000).split('.')[0]
             device = 'GPU' if obj_cuda else 'CPU'
-            seq_dur = int((length/100)*3)
-            print(f'Network processed {len(batches)*self.batch_size} frames ({seq_dur}s) in {dur_net}ms on {device}.')
+            seq_dur = int((length / 100) * 3)
+            print(f'Network processed {len(batches) * self.batch_size} frames ({seq_dur}s) in {dur_net}ms on {device}.')
 
         # Adjust padding
         if num_frames > 0:
             accum_out = accum_out[:len(accum_out) - (self.batch_size - num_frames)]
         accum_out = np.array(accum_out)
 
-        frames = np.array(frames)
+        # frames = np.array(frames)
 
         # Cut frames outside of prediction boundary
         raw_frames = raw_frames[offset:-offset]

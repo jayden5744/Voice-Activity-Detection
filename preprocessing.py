@@ -48,13 +48,13 @@ class FileManager:
         return len(self.data['files'])
 
     def prepare_files(self, normalize=False):
-        '''
+        """
         Prepares the files for the project.
         Will do the following check for each file:
         1. Check if it has been converted already to the desired format.
         2. Converts all files to WAV with the desired properties.
         3. Stores the converted files in a separate folder.
-        '''
+        """
 
         if not self.args.prepare_audio:
             print(f'Skipping check for {self.name}.')
@@ -82,7 +82,7 @@ class FileManager:
             track = (AudioSegment.from_file(file)
                      .set_frame_rate(self.sample_rate)
                      .set_sample_width(self.sample_width)
-                     .set_channels(self.sample_channel))
+                     .set_channels(self.sample_channels))
 
             # Normalize?
             if normalize:
@@ -95,10 +95,10 @@ class FileManager:
         print('\nDone!')
 
     def collect_frames(self):
-        '''
+        """
         Takes all the audio files and merges their frames together into one long array
         for use with the sample generator.
-        '''
+        """
 
         if 'frames' in self.data:
             print('Frame merging already done. Skipping.')
@@ -154,9 +154,9 @@ class FileManager:
         print('\nDone!')
 
     def label_frames(self):
-        '''
+        """
         Takes all audio frames and labels them using the WebRTC VAD.
-        '''
+        """
 
         if 'labels' in self.data:
             print('Frame labelling already done. Skipping.')
@@ -204,7 +204,7 @@ class DataManager:
         self.frame_size = int(self.sample_rate * (self.frame_size_ms / 1000.0))
 
     def prepare_data(self, speech_dataset, noise_dataset):
-        data = h5py_cache.File(self.args.data_forlder + '/data.hdf5', 'a', chunk_cache_mem_size=1024 ** 3)
+        data = h5py_cache.File(self.args.data_folder + '/data.hdf5', 'a', chunk_cache_mem_size=1024 ** 3)
         noise_levels_db = {'None': None, '-15': -15, '-3': -3}
         mfcc_window_frame_size = 4
         slice_min = self.args.slice_min_ms

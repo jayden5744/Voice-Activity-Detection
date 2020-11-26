@@ -57,7 +57,7 @@ class Net(nn.Module):
         else:
             x, _ = self.rnn(x)
 
-        x = x.contiguous().view(-1, self.batch_size ** 2)
+        x = x.contiguous().view(-1, self.frames ** 2)
 
         # (batch, units)
         if self.large:

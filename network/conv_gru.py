@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
-from torch.nn import Linear, RNN, LSTM, GRU, Conv1d, Conv2d, Dropout, BatchNorm1d, BatchNorm2d
+from torch.nn import Conv1d, Conv2d, Dropout, LSTM, GRU, BatchNorm1d, BatchNorm2d
 
 obj_cuda = torch.cuda.is_available()
 
@@ -140,7 +140,7 @@ class GatedResidualConv(nn.Module):
     element-wise multiplication. Input and output sizes are unchanged.
     """
 
-    def __init__(self, channels, kernel_size=3, dilation=1):
+    def __init__(self, channels):
         super(GatedResidualConv, self).__init__()
 
         self.gated_conv = GatedConv(channels, channels)
@@ -167,7 +167,7 @@ class NickNet(nn.Module):
                  fcl=True, bidir=False):
         super(NickNet, self).__init__()
 
-        frames = args.framse
+        frames = args.frames
         features = args.features
         batch_size = args.batch_size
 
@@ -245,8 +245,3 @@ class NickNet(nn.Module):
 
         # (batch, 2)
         return F.softmax(x, dim=1)
-
-if __name__ == '__main__':
-    gru = NickNet(large=True)
-    num_params(gru)
-    print(gru)
