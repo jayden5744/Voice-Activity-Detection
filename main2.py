@@ -34,7 +34,7 @@ def get_args():
     # prepare_audio should always be false unless one wants to force a new data generator
     parser.add_argument('--prepare_audio', default=False, type=bool)
     # train_model will enforce a fresh training of our defined models, rathre than loading them from local storage.
-    parser.add_argument('--train_model', default=False, type=bool)
+    parser.add_argument('--train_model', default=True, type=bool)
 
     # Hyper-parameters
     parser.add_argument('--batch_size', default=4096, type=int)
@@ -102,17 +102,17 @@ def load_model(args):
         # LSTM, small, γ = 0
         set_seed()
         net = Net(args, large=False)
-        trainer.train(net, data, title='net', gamma=0)
+        # trainer.train(net, data, title='net', gamma=0)
 
         # LSTM, large, γ = 2
         set_seed()
         net_large = Net(args)
-        trainer.train(net_large, data, title='net_large', gamma=2)
+        # trainer.train(net_large, data, title='net_large', gamma=2)
 
         # Conv + GRU, small, γ = 2
         set_seed()
         gru = NickNet(args, large=False)
-        trainer.train(gru, data, title='gru', gamma=2)
+        # trainer.train(gru, data, title='gru', gamma=2)
 
         # Conv + GRU, large, γ = 2
         set_seed()
@@ -122,12 +122,12 @@ def load_model(args):
         # DenseNet, small, γ = 2
         set_seed()
         densenet = DenseNet(large=False, batch_size=args.batch_size)
-        trainer.train(densenet, data, title='densenet', use_adam=False, lr=1, momentum=0.7, gamma=2)
+        # trainer.train(densenet, data, title='densenet', use_adam=False, lr=1, momentum=0.7, gamma=2)
 
         # DenseNet, large, γ = 2
         set_seed()
         densenet_large = DenseNet(large=True, batch_size=args.batch_size)
-        trainer.train(densenet, data, title='densenet_large', use_adam=False, lr=1, momentum=0.7, gamma=2)
+        # trainer.train(densenet, data, title='densenet_large', use_adam=False, lr=1, momentum=0.7, gamma=2)
     else:
         net = load_net(title='net')
         net_large = load_net(title='net_large')
@@ -143,13 +143,18 @@ if __name__ == '__main__':
     create_folder("./")  # 현재폴더에 필요한 파일 생성
     data = prepare_audio(args)
     net, net_large, gru, gru_large, densenet, densenet_large = load_model(args)
+    print('gru: ')
+    print(gru)
+    print('gru large : ')
+    print(gru_large)
+
     networks = {
         'RNN': net,
-        'RNN (large)': net_large,
-        'Conv + RNN': gru,
+        # 'RNN (large)': net_large,
+        # 'Conv + RNN': gru,
         'Conv + RNN (large)': gru_large,
-        'DenseNet': densenet,
-        'DenseNet (large)': densenet_large
+        # 'DenseNet': densenet,
+        # 'DenseNet (large)': densenet_large
     }
     evalator = Evaluation(args)
     # ROC Curve(None)
@@ -158,20 +163,20 @@ if __name__ == '__main__':
     evalator.roc_auc(networks, data, '-15')
     # ROC Curve(-3)
     evalator.roc_auc(networks, data, '-3')
-
-    # Fixed FRR
-    evalator.far(networks, data, frr=1)
-
-    # Qualitative results
-    evalator.netvad(net, data, only_plot_net=False, net_name='RNN')
-    print('Complete RNN')
-    evalator.netvad(net_large, data, only_plot_net=False, net_name='RNN(large)')
-    print('Complete RNN (Large)')
-    evalator.netvad(net_large, data, only_plot_net=False, net_name='Conv + RNN')
-    print('Complete Conv + RNN')
-    evalator.netvad(net_large, data, only_plot_net=False, net_name='Conv + RNN (large)')
-    print('Complete Conv + RNN (large)')
-    evalator.netvad(net_large, data, only_plot_net=False, net_name='DenseNet')
-    print('Complete DenseNet')
-    evalator.netvad(net_large, data, only_plot_net=False, net_name='DenseNet (large)')
-    print('Complete DenseNet (large)')
+    #
+    # # Fixed FRR
+    # evalator.far(networks, data, frr=1)
+    #
+    # # Qualitative results
+    # evalator.netvad(net, data, only_plot_net=False, net_name='RNN')
+    # print('Complete RNN')
+    # evalator.netvad(net_large, data, only_plot_net=False, net_name='RNN(large)')
+    # print('Complete RNN (Large)')
+    # evalator.netvad(net_large, data, only_plot_net=False, net_name='Conv + RNN')
+    # print('Complete Conv + RNN')
+    # evalator.netvad(net_large, data, only_plot_net=False, net_name='Conv + RNN (large)')
+    # print('Complete Conv + RNN (large)')
+    # evalator.netvad(net_large, data, only_plot_net=False, net_name='DenseNet')
+    # print('Complete DenseNet')
+    # evalator.netvad(net_large, data, only_plot_net=False, net_name='DenseNet (large)')
+    # print('Complete DenseNet (large)')

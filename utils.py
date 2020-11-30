@@ -39,7 +39,7 @@ class Vis:
         plt.plot(time, raw)
         plt.plot(time_labels, labels - 0.5)
         # plt.show()
-        plt.savefig("./images/{}.png".format(title))
+        plt.savefig("./images/{}.jpg".format(title))
         plt.clf()
 
     @staticmethod

@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
-from torch.nn import Conv1d, Conv2d, Dropout, LSTM, GRU, BatchNorm1d, BatchNorm2d
+from torch.nn import LSTM, GRU
 
 obj_cuda = torch.cuda.is_available()
 
@@ -39,6 +39,8 @@ class BiRNN(nn.Module):
         if not fcl:
             self.embed = nn.Linear(embed_sz, 2)
         else:
+            print("embed_size: ", embed_sz)
+            print("size: ", sz)
             if large:
                 self.embed = nn.Sequential(
                     nn.Linear(embed_sz, sz + 14),
